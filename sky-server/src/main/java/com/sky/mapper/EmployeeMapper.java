@@ -6,6 +6,10 @@ import com.sky.entity.Employee;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 
 @Mapper
 public interface EmployeeMapper {
@@ -25,4 +29,13 @@ public interface EmployeeMapper {
     void insert(Employee employee);
 
     Page<Employee> query(EmployeePageQueryDTO employeePageQueryDTO);
+
+    //启用禁用员工账号，编辑员工信息也在这里
+    void update(Employee employee);
+
+
+    @Select("select * from employee where id = #{id}")
+    Employee searchById(Long id);
+
+
 }

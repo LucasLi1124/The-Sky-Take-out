@@ -5,17 +5,22 @@ import com.sky.dto.EmployeeDTO;
 import com.sky.dto.EmployeeLoginDTO;
 import com.sky.dto.EmployeePageQueryDTO;
 import com.sky.entity.Employee;
+import com.sky.enumeration.OperationType;
 import com.sky.properties.JwtProperties;
 import com.sky.result.PageResult;
 import com.sky.result.Result;
 import com.sky.service.EmployeeService;
 import com.sky.utils.JwtUtil;
 import com.sky.vo.EmployeeLoginVO;
+import io.swagger.models.auth.In;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.xmlbeans.impl.xb.xsdschema.Public;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -83,6 +88,29 @@ public class EmployeeController {
         log.info("分页查询员工：{}",employeePageQueryDTO);
         PageResult pageResult = employeeService.query(employeePageQueryDTO);
         return Result.success(pageResult);
+    }
+
+    @PostMapping("/status/{status}")
+    public Result status(@PathVariable Integer status, Long id){
+        log.info("启用禁用员工账号：{}",status);
+        employeeService.status(status,id);
+        return Result.success();
+    }
+
+    @GetMapping("/{id}")
+    public Result<Employee> idSearch(@PathVariable Long id){
+        log.info("根据id查询员工信息：{}",id);
+        Employee employee = employeeService.searchById(id);
+        return Result.success(employee);
+    }
+
+
+
+    @PutMapping
+    public Result<String> update(@RequestBody EmployeeDTO employeeDTO){
+        log.info("员工信息修改：{}",employeeDTO);
+        employeeService.update(employeeDTO);
+        return Result.success();
     }
 
 }
