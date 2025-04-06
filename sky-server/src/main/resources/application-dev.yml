@@ -6,3 +6,8 @@ sky:
     database: sky_take_out
     username: root
     password: LlF2024!
+  alioss:
+    endpoint: oss-cn-beijing.aliyuncs.com
+    access-key-id: LTAI5tSLZEd4CgdMFwE9kakU
+    access-key-secret: ihYpXEEOSFt2vrukPAkEBPAzof0FcK
+    bucket-name: theskytakeout
