@@ -56,6 +56,12 @@ public class DishController {
         dishService.update(dishDTO);
         return Result.success();
     }
+    @PostMapping("/status/{status}")
+    public Result<String> status(@PathVariable Integer status,Long id){
+        log.info("修改菜品状态：{}",status);
+        dishService.status(status,id);
+        return Result.success();
+    }
 
     @GetMapping("list")
     public Result<List<Dish>> list(Long categoryId) {

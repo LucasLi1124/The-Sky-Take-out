@@ -3,6 +3,14 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.sky.mapper.SetmealDishMapper">
+    <insert id="insertBatch">
+        INSERT INTO setmeal_dish (setmeal_id, dish_id, name, price, copies)
+        VALUES
+        <foreach collection="setmealDishes" item="setmealDish" separator=",">
+            (#{setmealDish.setmealId}, #{setmealDish.dishId}, #{setmealDish.name}, #{setmealDish.price},
+            #{setmealDish.copies})
+        </foreach>
+    </insert>
 
     <select id="getBySetmealId" resultType="java.lang.Long">
         SELECT setmeal_id FROM setmeal_dish where dish_id in
