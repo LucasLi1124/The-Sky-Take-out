@@ -133,7 +133,7 @@ public class DishServiceImpl implements DishService {
     @Transactional
     public void status(Integer status, Long id) {
         if(status == StatusConstant.DISABLE){
-            List<Long > dishIds = new ArrayList<>();
+            List<Long> dishIds = new ArrayList<>();
             dishIds.add(id);
             List<Long> setmeals = setmealDishMapper.getBySetmealId(dishIds);
             if (setmeals != null && setmeals.size() > 0){
