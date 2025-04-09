@@ -54,7 +54,7 @@ public class DishServiceImpl implements DishService {
         Long dishId = dish.getId();
 
         List<DishFlavor> list = dishDTO.getFlavors();
-        if (list != null && list.size ()> 0) {
+        if (list != null && list.size() > 0) {
             list.forEach(dishFlavor -> {
                 dishFlavor.setDishId(dishId);
 
@@ -126,18 +126,18 @@ public class DishServiceImpl implements DishService {
                 categoryId(categoryId).
                 status(StatusConstant.ENABLE).
                 build();
-       return dishMapper.list(dish);
+        return dishMapper.list(dish);
     }
 
     @Override
     @Transactional
     public void status(Integer status, Long id) {
-        if(status == StatusConstant.DISABLE){
+        if (status == StatusConstant.DISABLE) {
             List<Long> dishIds = new ArrayList<>();
             dishIds.add(id);
             List<Long> setmeals = setmealDishMapper.getBySetmealId(dishIds);
-            if (setmeals != null && setmeals.size() > 0){
-                for (Long setmeal : setmeals){
+            if (setmeals != null && setmeals.size() > 0) {
+                for (Long setmeal : setmeals) {
                     Setmeal setmeal1 = Setmeal.builder().
                             id(setmeal).
                             status(StatusConstant.DISABLE).
@@ -153,5 +153,22 @@ public class DishServiceImpl implements DishService {
         dishMapper.update(dish);
     }
 
+    @Override
+    public List<DishVO> searchByDish(Dish dish) {
 
+
+        List<Dish> dishList = dishMapper.list(dish);
+        List<DishVO> dishVOList = new ArrayList<>();
+        for (Dish dishes : dishList){
+            DishVO dishVO = new DishVO();
+            BeanUtils.copyProperties(dishes,dishVO);
+            List<DishFlavor> byIdWithFlavor = dishFlavorMapper.getByIdWithFlavor(dishes.getId());
+            dishVO.setFlavors(byIdWithFlavor);
+            dishVOList.add(dishVO);
+        }
+       return dishVOList;
+
+
+
+    }
 }

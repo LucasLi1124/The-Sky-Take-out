@@ -5,6 +5,7 @@ import com.sky.annotation.AutoFill;
 import com.sky.dto.DishPageQueryDTO;
 import com.sky.entity.Dish;
 import com.sky.enumeration.OperationType;
+import com.sky.vo.DishItemVO;
 import com.sky.vo.DishVO;
 import lombok.Data;
 import org.apache.ibatis.annotations.Delete;
@@ -41,4 +42,12 @@ public interface DishMapper {
     List<Dish> list(Dish dish);
 
     List<Dish> getBySetmealId(Long id);
+
+
+    @Select("SELECT * FROM dish left join setmeal_dish on setmeal_dish.dish_id = dish.id where setmeal_id  = #{id}")
+    List<DishItemVO> getByIdWithSetmealDish(Long setmealId);
+
+
+    @Select("SELECT * from dish where dish.id = category_id ")
+    List<Dish> searchByCateforyId(Long categoryId);
 }
