@@ -12,6 +12,7 @@ import com.sky.vo.DishItemVO;
 import com.sky.vo.SetmealVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
 
 import javax.print.attribute.ResolutionSyntax;
@@ -25,6 +26,7 @@ public class SetmealController {
     private SetmealService setmealService;
 
     @GetMapping("/list")
+    @Cacheable(cacheNames = "setmealCache",key = "#categoryId")
     public Result<List<Setmeal>> list(Long categoryId) {
         log.info("根据分类id查询套餐：{}", categoryId);
         List<Setmeal> list = setmealService.searchByCateforyId(categoryId);
