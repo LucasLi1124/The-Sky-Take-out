@@ -3,9 +3,12 @@ package com.sky.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
 import com.sky.constant.MessageConstant;
 import com.sky.context.BaseContext;
 import com.sky.dto.OrdersDTO;
+import com.sky.dto.OrdersPageQueryDTO;
 import com.sky.dto.OrdersPaymentDTO;
 import com.sky.dto.OrdersSubmitDTO;
 import com.sky.entity.*;
@@ -13,11 +16,13 @@ import com.sky.exception.AddressBookBusinessException;
 import com.sky.exception.OrderBusinessException;
 import com.sky.exception.ShoppingCartBusinessException;
 import com.sky.mapper.*;
+import com.sky.result.PageResult;
 import com.sky.service.OrderService;
 import com.sky.utils.WeChatPayUtil;
 import com.sky.vo.OrderPaymentVO;
 import com.sky.vo.OrderSubmitVO;
 
+import com.sky.vo.OrderVO;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.BeanUtils;
@@ -32,6 +37,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -50,7 +56,6 @@ public class OrderServiceImpl implements OrderService {
     private WeChatPayUtil weChatPayUtil;
     @Autowired
     private UserMapper userMapper;
-
 
 
     /**
@@ -106,7 +111,6 @@ public class OrderServiceImpl implements OrderService {
                 .orderAmount(orders.getAmount())
                 .orderTime(orders.getOrderTime())
                 .build();
-
 
 
         return orderSubmitVO;
@@ -172,6 +176,137 @@ public class OrderServiceImpl implements OrderService {
                 .build();
 
         orderMapper.update(orders);
+    }
+
+    /**
+     * 查询历史订单
+     *
+     * @param pageNum
+     * @param pageSize
+     * @param status
+     * @return
+     */
+    @Override
+    public PageResult historyOrders(int pageNum, int pageSize, Integer status) {
+        //设置分页查询的基本条件
+        PageHelper.startPage(pageNum, pageSize);
+        OrdersPageQueryDTO ordersPageQueryDTO = new OrdersPageQueryDTO();
+        //设置当前用户id
+        ordersPageQueryDTO.setUserId(BaseContext.getCurrentId());
+        ordersPageQueryDTO.setStatus(status);
+
+        //分页查询当前用户的订单信息
+        Page<Orders> orders = orderMapper.pagequery(ordersPageQueryDTO);
+        //创建一个List 类型 为 VO， 用来接收订单的全部信息并且返回
+        List<OrderVO> orderVOS = new ArrayList<>();
+
+        //将查询回来的数据，进行条件判断，如果满足，封装到VO中
+        if (orders != null && orders.getTotal() > 0) {
+            // 遍历通过分页查询获得的每一个订单信息
+            for (Orders orders1 : orders) {
+
+                // 通过遍历订单信息，获取到每一个订单的主键 id
+                Long orderId = orders1.getId();
+
+                // 调用orderDetailMapper，通过订单id，查询到每一个订单的订单明细（每道菜品的信息）
+                List<OrderDetail> orderDetails = orderDetailMapper.getByOrderId(orderId);
+
+                // 创建一个VO对象，用来传递给前端
+                OrderVO orderVO = new OrderVO();
+
+                // 将通过分页查询获得的订单数据里面的信息，拷贝给VO
+                BeanUtils.copyProperties(orders1, orderVO);
+
+                // 在将获得的订单明细，设置给VO
+                orderVO.setOrderDetailList(orderDetails);
+
+                //最终 VO里面包含了订单数据以及订单明细，在添加到list当中
+                orderVOS.add(orderVO);
+            }
+        }
+        //返回封装好的分页数据（总数 + 当前页数）
+        return new PageResult(orders.getTotal(), orderVOS);
+    }
+
+    /**
+     * 订单详情
+     *
+     * @param id
+     * @return
+     */
+    @Override
+    public OrderVO orderDetail(Long id) {
+        Orders orders = orderMapper.getById(id);
+        List<OrderDetail> orderDetailsList = orderDetailMapper.getByOrderId(orders.getId());
+        OrderVO orderVO = new OrderVO();
+        BeanUtils.copyProperties(orders, orderVO);
+        orderVO.setOrderDetailList(orderDetailsList);
+
+
+        return orderVO;
+    }
+
+
+    /**
+     * 取消订单
+     *
+     * @param id
+     */
+    @Override
+    public void cancle(Long id) throws Exception {
+        Orders orders = orderMapper.getById(id);
+        Integer Status = orders.getStatus();
+        if (Status == null) {
+            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
+        }
+        if (Status > 2) {
+            throw new OrderBusinessException("您当前的订单状态为： " + Status + "若要取消需电话沟通商家");
+
+        }
+        Orders orders1 = new Orders();
+        orders1.setId(orders.getId());
+        if (Status == Orders.TO_BE_CONFIRMED) {
+//            weChatPayUtil.refund(
+//                    orders.getNumber(), //商户订单号
+//                    orders.getNumber(), //商户退款单号
+//                    new BigDecimal(0.01),//退款金额，单位 元
+//                    new BigDecimal(0.01));//原订单金额
+                    orders1.setPayStatus(Orders.REFUND);
+
+        }
+        orders1.setStatus(Orders.CANCELLED);
+        orders1.setCancelTime(LocalDateTime.now());
+        orders1.setCancelReason("用户取消");
+        orderMapper.update(orders1);
+
+
+    }
+
+    /**
+     * 再来一单
+     * @param id
+     */
+    @Override
+    public void repetition(Long id) {
+        Long userId = BaseContext.getCurrentId();
+        List<OrderDetail> orderDetails = orderDetailMapper.getByOrderId(id);
+
+        List<ShoppingCart> shoppingCarts =  orderDetails.stream().map(v -> {
+            ShoppingCart shoppingCart = ShoppingCart.builder()
+                    .userId(userId)
+                    .name(v.getName())
+                    .image(v.getImage())
+                    .dishId(v.getDishId())
+                    .setmealId(v.getSetmealId())
+                    .dishFlavor(v.getDishFlavor())
+                    .number(v.getNumber())
+                    .amount(v.getAmount())
+                    .createTime(LocalDateTime.now())
+                    .build();
+            return shoppingCart;
+        }).collect(Collectors.toList());
+
+        shoppingCartMapper.insertBatch(shoppingCarts);
     }
 
 

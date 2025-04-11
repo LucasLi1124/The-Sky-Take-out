@@ -4,6 +4,8 @@ package com.sky.controller.admin;
 import com.sky.constant.MessageConstant;
 import com.sky.result.Result;
 import com.sky.utils.AliOssUtil;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,6 +20,7 @@ import java.util.UUID;
 @RestController
 @Slf4j
 @RequestMapping("/admin/common")
+@Api(tags = "通用接口")
 public class CommonController {
     @Autowired
     private AliOssUtil aliOssUtil;

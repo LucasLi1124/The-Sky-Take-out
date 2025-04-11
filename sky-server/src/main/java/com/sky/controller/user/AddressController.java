@@ -5,6 +5,7 @@ import com.sky.context.BaseContext;
 import com.sky.entity.AddressBook;
 import com.sky.result.Result;
 import com.sky.service.AddressService;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.annotations.Delete;
@@ -15,7 +16,7 @@ import java.util.List;
 
 @RestController
 @Slf4j
-@ApiOperation("C端地址管理")
+@Api(tags = "C端地址管理接口")
 @RequestMapping("/user/addressBook")
 
 public class AddressController {

@@ -10,6 +10,7 @@ import com.sky.result.Result;
 import com.sky.service.SetmealService;
 import com.sky.vo.DishItemVO;
 import com.sky.vo.SetmealVO;
+import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
@@ -21,6 +22,7 @@ import java.util.List;
 @RestController("userSetmealController")
 @RequestMapping("/user/setmeal")
 @Slf4j
+@Api(tags = "C端套餐相关接口")
 public class SetmealController {
     @Autowired
     private SetmealService setmealService;
