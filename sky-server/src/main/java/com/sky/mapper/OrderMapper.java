@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Mapper
-public interface OrderMapper {
+public interface  OrderMapper {
 
 
     /**
@@ -64,5 +64,24 @@ public interface OrderMapper {
     @Select("SELECT * from orders where id = #{id}")
     Orders getById(Long id);
 
+    /**
+     * 各个状态的订单数量统计
+     * @param confirmed
+     * @return
+     */
 
+
+    @Select("select count(id) from orders where status = #{status}")
+    Integer countByStatus(Integer confirmed);
+
+    /**
+     * 处理超时订单
+     * @param status
+     * @param orderTime
+     * @return
+     */
+
+
+    @Select("SELECT * from orders where status = #{status} and order_time < #{orderTime}")
+    List<Orders> getByStatusAndOrderTimeLT(Integer status, LocalDateTime orderTime);
 }
