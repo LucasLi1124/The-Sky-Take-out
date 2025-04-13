@@ -62,6 +62,7 @@
 
     </update>
 
+
     <select id="pagequery" resultType="Orders">
         select * from orders
         <where>
@@ -74,5 +75,32 @@
         </where>
         order by order_time desc
     </select>
+    <select id="sumByMap" resultType="java.lang.Double">
+        SELECT sum(amount) from orders
+        <where>
+            <if test="begin != null">and order_time &gt; #{begin}</if>
+            <if test="end != null">and order_time &lt; #{end}</if>
+            <if test="status != null">and status = #{status}</if>
+        </where>
+    </select>
+    <select id="countByMap" resultType="java.lang.Integer">
+        SELECT count(id) from orders
+        <where>
+            <if test="begin != null">and order_time &gt; #{begin}</if>
+            <if test="end != null">and order_time &lt; #{end}</if>
+            <if test="status != null">and status = #{status}</if>
+        </where>
+    </select>
+    <select id="getSalesTop10" resultType="com.sky.dto.GoodsSalesDTO">
+        SELECT order_detail.name, sum(order_detail.number) number
+        from order_detail, orders o
+        where order_detail.order_id = o.id and o.status = 5
+        <if test="begin != null">and o.order_time &gt;= #{begin}</if>
+        <if test="end != null">and o.order_time &lt;= #{end}</if>
+        group by order_detail.name
+        order by number desc
+        limit 10
+    </select>
+
 
 </mapper>
