@@ -54,6 +54,13 @@
             <if test="name != null">and name like concat('%',#{name},'%')</if>
         </where>
     </select>
+    <select id="countByMap" resultType="java.lang.Integer">
+        Select count(id) from setmeal
+        <where>
+            <if test="categoryId != null">and category_id = #{categoryId}</if>
+            <if test="status != null">and status = #{status}</if>
+        </where>
+    </select>
 
 
 </mapper>
