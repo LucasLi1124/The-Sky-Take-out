@@ -1,4 +1,4 @@
-# Sky Take-Out (苍穹外卖)
+# Sky Take-Out
 
 A full-stack food delivery system built with Java Spring Boot. This project simulates a typical take-out platform with features such as user ordering, dish and set meal management, shopping cart, and order processing. Ideal for learning backend development and system architecture design.
 
